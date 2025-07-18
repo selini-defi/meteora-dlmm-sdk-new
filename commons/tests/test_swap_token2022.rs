@@ -205,11 +205,12 @@ async fn test_swap_exact_out() {
             &lb_pair_state,
             out_amount,
             swap_for_y,
-            bin_arrays,
+            &bin_arrays,
             None,
             &clock,
             &mint_x_account,
             &mint_y_account,
+            std::time::Duration::from_secs(10),
         )
         .unwrap();
 
@@ -406,11 +407,12 @@ async fn test_swap() {
             &lb_pair_state,
             amount_in,
             swap_for_y,
-            bin_arrays,
+            &bin_arrays,
             None,
             &clock,
             &mint_x_account,
             &mint_y_account,
+            std::time::Duration::from_secs(10),
         )
         .unwrap();
 
