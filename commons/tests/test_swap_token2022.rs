@@ -406,12 +406,12 @@ async fn test_swap() {
             &lb_pair_state,
             amount_in,
             swap_for_y,
-            bin_arrays,
+            &bin_arrays,
             None,
             &clock,
             &mint_x_account,
             &mint_y_account,
-        )
+            std::time::Duration::from_secs(10),
         .unwrap();
 
         println!("quote_result {:?}", quote_result);
