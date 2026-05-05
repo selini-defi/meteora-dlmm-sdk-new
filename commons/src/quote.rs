@@ -437,11 +437,12 @@ pub fn quote_exact_out(
     lb_pair: &LbPair,
     mut amount_out: u64,
     swap_for_y: bool,
-    bin_arrays: HashMap<Pubkey, BinArray>,
+    bin_arrays: &HashMap<Pubkey, BinArray>,
     bitmap_extension: Option<&BinArrayBitmapExtension>,
     clock: &Clock,
     mint_x_account: &Account,
     mint_y_account: &Account,
+    timeout: std::time::Duration,
 ) -> Result<SwapExactOutQuote> {
     let current_timestamp = clock.unix_timestamp as u64;
     let current_slot = clock.slot;
@@ -468,7 +469,12 @@ pub fn quote_exact_out(
     amount_out =
         calculate_transfer_fee_included_amount(out_mint_account, amount_out, epoch)?.amount;
 
+    let start = std::time::Instant::now();
     while amount_out > 0 {
+        if start.elapsed() >= timeout {
+            return Err(anyhow::anyhow!("Timeout reached"));
+        }
+
         let active_bin_array_pubkey = get_bin_array_pubkeys_for_swap(
             lb_pair_pubkey,
             &lb_pair,
@@ -545,11 +551,12 @@ pub fn quote_exact_in(
     lb_pair: &LbPair,
     amount_in: u64,
     swap_for_y: bool,
-    bin_arrays: HashMap<Pubkey, BinArray>,
+    bin_arrays: &HashMap<Pubkey, BinArray>,
     bitmap_extension: Option<&BinArrayBitmapExtension>,
     clock: &Clock,
     mint_x_account: &Account,
     mint_y_account: &Account,
+    timeout: std::time::Duration,
 ) -> Result<SwapExactInQuote> {
     let current_timestamp = clock.unix_timestamp as u64;
     let current_slot = clock.slot;
@@ -578,7 +585,12 @@ pub fn quote_exact_in(
 
     let mut amount_left = transfer_fee_excluded_amount_in;
 
+    let start = std::time::Instant::now();
     while amount_left > 0 {
+        if start.elapsed() >= timeout {
+            return Err(anyhow::anyhow!("Timeout reached"));
+        }
+
         let active_bin_array_pubkey = get_bin_array_pubkeys_for_swap(
             lb_pair_pubkey,
             &lb_pair,
@@ -789,11 +801,12 @@ mod tests {
             &lb_pair,
             out_sol_amount,
             false,
-            bin_arrays.clone(),
+            &bin_arrays,
             None,
             &clock,
             &mint_x_account,
             &mint_y_account,
+            std::time::Duration::from_secs(10),
         )
         .unwrap();
 
@@ -809,11 +822,12 @@ mod tests {
             &lb_pair,
             in_amount,
             false,
-            bin_arrays.clone(),
+            &bin_arrays,
             None,
             &clock,
             &mint_x_account,
             &mint_y_account,
+            std::time::Duration::from_secs(10),
         )
         .unwrap();
 
@@ -830,11 +844,12 @@ mod tests {
             &lb_pair,
             out_usdc_amount,
             true,
-            bin_arrays.clone(),
+            &bin_arrays,
             None,
             &clock,
             &mint_x_account,
             &mint_y_account,
+            std::time::Duration::from_secs(10),
         )
         .unwrap();
 
@@ -850,11 +865,12 @@ mod tests {
             &lb_pair,
             in_amount,
             true,
-            bin_arrays,
+            &bin_arrays,
             None,
             &clock,
             &mint_x_account,
             &mint_y_account,
+            std::time::Duration::from_secs(10),
         )
         .unwrap();
 
@@ -925,11 +941,12 @@ mod tests {
             &lb_pair,
             in_sol_amount,
             true,
-            bin_arrays.clone(),
+            &bin_arrays,
             None,
             &clock,
             &mint_x_account,
             &mint_y_account,
+            std::time::Duration::from_secs(10),
         )
         .unwrap();
 
@@ -946,11 +963,12 @@ mod tests {
             &lb_pair,
             in_usdc_amount,
             false,
-            bin_arrays.clone(),
+            &bin_arrays,
             None,
             &clock,
             &mint_x_account,
             &mint_y_account,
+            std::time::Duration::from_secs(10),
         )
         .unwrap();
 
@@ -1012,11 +1030,12 @@ mod tests {
             &lb_pair,
             in_base_amount,
             true,
-            bin_arrays.clone(),
+            &bin_arrays,
             None,
             &clock,
             &mint_x_account,
             &mint_y_account,
+            std::time::Duration::from_secs(10),
         );
 
         assert!(quote_result.is_err());
@@ -1030,11 +1049,12 @@ mod tests {
             &lb_pair,
             in_quote_amount,
             false,
-            bin_arrays.clone(),
+            &bin_arrays,
             None,
             &clock,
             &mint_x_account,
             &mint_y_account,
+            std::time::Duration::from_secs(10),
         );
         assert!(quote_result.is_err());
         let err = quote_result.unwrap_err();
@@ -1047,11 +1067,12 @@ mod tests {
             &lb_pair,
             out_quote_amount,
             true,
-            bin_arrays.clone(),
+            &bin_arrays,
             None,
             &clock,
             &mint_x_account,
             &mint_y_account,
+            std::time::Duration::from_secs(10),
         );
 
         assert!(quote_result.is_err());
@@ -1065,11 +1086,12 @@ mod tests {
             &lb_pair,
             out_base_amount,
             false,
-            bin_arrays.clone(),
+            &bin_arrays,
             None,
             &clock,
             &mint_x_account,
             &mint_y_account,
+            std::time::Duration::from_secs(10),
         );
 
         assert!(quote_result.is_err());

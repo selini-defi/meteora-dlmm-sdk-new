@@ -95,11 +95,12 @@ pub async fn execute_swap_with_price_impact<C: Deref<Target = impl Signer> + Clo
         &lb_pair_state,
         amount_in,
         swap_for_y,
-        bin_arrays,
+        &bin_arrays,
         bitmap_extension.as_ref(),
         &clock,
         &mint_x_account,
         &mint_y_account,
+        std::time::Duration::from_secs(10),
     )?;
 
     println!("{:#?}", quote);

@@ -3,9 +3,9 @@ members = ["cli", "commons", "market_making"]
 resolver = "2"
 
 [workspace.dependencies]
-anchor-lang = "0.31.0"
-anchor-spl = "0.31.0"
-anchor-client = "0.31.0"
+anchor-lang = { git = "https://github.com/coral-xyz/anchor.git", package = "anchor-lang", rev = "fa381028b6c28ab865644ac9ab02948ba30a89a2" }
+anchor-spl = { git = "https://github.com/coral-xyz/anchor.git", package = "anchor-spl", rev = "fa381028b6c28ab865644ac9ab02948ba30a89a2" }
+anchor-client = { git = "https://github.com/coral-xyz/anchor.git", package = "anchor-client", rev = "fa381028b6c28ab865644ac9ab02948ba30a89a2" }
 
 solana-sdk = "2.1.0"
 spl-associated-token-account = "6.0.0"
